@@ -21,9 +21,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,7 +59,7 @@ class MainActivity : ComponentActivity() {
             var showDialog by remember { mutableStateOf(false) }
             val navController = rememberNavController()
             val currentRoute = navController.currentBackStackEntryAsState()
-            val showButton = currentRoute.value?.destination?.hasRoute(Route.List::class) == true
+            val showButton = currentRoute.value?.destination?.route == "book"
             val launcher = rememberLauncherForActivityResult(contract =
                 ActivityResultContracts.RequestPermission(), onResult = {} )
 
@@ -71,7 +73,11 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     topBar = {
                         TopAppBar(
-                            title = { Text("Bem-vindo/a!") },
+                            title = { Text("Meus Livros") },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
 
                             actions = {
 
@@ -89,8 +95,8 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         val items = listOf(
                             BottomNavItem.HomeButton,
-                            BottomNavItem.ListButton,
-                            BottomNavItem.MapButton,
+                            BottomNavItem.SearchButton,
+                            BottomNavItem.ProfileButton,
                             BottomNavItem.BookButton
                         )
 

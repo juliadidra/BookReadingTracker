@@ -52,37 +52,31 @@ fun BookScreen() {
         Book("The Alchemist", "Paulo Coelho", "https://placeholder.com/book7.jpg", 0)
     )
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Meus Livros") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        },
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { /* Navegação futura: Home dos livros */ },
-                    icon = { Icon(Icons.Default.Book, contentDescription = "Home") },
-                    label = { Text("Home") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { /* Navegação futura: Busca */ },
-                    icon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                    label = { Text("Buscar") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { showProfile = true },
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-                    label = { Text("Perfil") }
-                )
-            }
-        }
+//        bottomBar = {
+//            NavigationBar {
+//                NavigationBarItem(
+//                    selected = true,
+//                    onClick = { /* Navegação futura: Home dos livros */ },
+//                    icon = { Icon(Icons.Default.Book, contentDescription = "Home") },
+//                    label = { Text("Home") }
+//                )
+//                NavigationBarItem(
+//                    selected = false,
+//                    onClick = { /* Navegação futura: Busca */ },
+//                    icon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+//                    label = { Text("Buscar") }
+//                )
+//                NavigationBarItem(
+//                    selected = false,
+//                    onClick = { showProfile = true },
+//                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+//                    label = { Text("Perfil") }
+//                )
+//            }
+//        }
+
+
+
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -226,4 +220,4 @@ fun SavedBookItem(book: Book) {
             }
         }
     }
-} 
+}

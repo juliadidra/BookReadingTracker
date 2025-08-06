@@ -5,6 +5,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
@@ -12,9 +14,9 @@ sealed interface Route {
     @Serializable
     data object Home : Route
     @Serializable
-    data object List : Route
+    data object Profile : Route
     @Serializable
-    data object Map : Route
+    data object Search : Route
     @Serializable
     data object Book : Route
 }
@@ -24,11 +26,13 @@ sealed class BottomNavItem(
     val route: Route)
 {
     data object HomeButton :
-        BottomNavItem("Início", Icons.Default.Home, Route.Home)
-    data object ListButton :
-        BottomNavItem("Favoritos", Icons.Default.Favorite, Route.List)
-    data object MapButton :
-        BottomNavItem("Mapa", Icons.Default.LocationOn, Route.Map)
+        BottomNavItem("Início", Icons.Default.Home, Route.Book)
     data object BookButton :
         BottomNavItem("Livros", Icons.Default.Book, Route.Book)
+
+    data object SearchButton :
+        BottomNavItem("Buscar", Icons.Default.Search, Route.Search)
+
+    data object ProfileButton :
+        BottomNavItem("Perfil", Icons.Default.Person, Route.Profile)
 }

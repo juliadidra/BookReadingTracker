@@ -13,10 +13,10 @@ import com.example.weatherapp.ui.book.BookScreen // (a ser criada)
 
 @Composable
 fun MainNavHost(navController: NavHostController, viewModel: MainViewModel) {
-    NavHost(navController, startDestination = Route.Home) {
-        composable<Route.Home> { HomePage(viewModel) }
-        composable<Route.List> { ListPage(modifier = Modifier, viewModel) }
-        composable<Route.Map> { MapPage(viewModel) }
+    NavHost(navController, startDestination = Route.Book) {
+
         composable<Route.Book> { BookScreen() } // Nova rota para livros
+        composable<Route.Search> { BookScreen() }
+        composable<Route.Profile> { BookScreen() }
     }
 }
