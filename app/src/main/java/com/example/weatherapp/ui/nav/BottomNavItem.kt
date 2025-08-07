@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
@@ -17,6 +18,9 @@ sealed interface Route {
     data object Profile : Route
     @Serializable
     data object Search : Route
+    @Serializable
+    data object Pomodoro : Route
+    
 }
 sealed class BottomNavItem(
     val title: String,
@@ -29,4 +33,6 @@ sealed class BottomNavItem(
         BottomNavItem("Buscar", Icons.Default.Search, Route.Search)
     data object ProfileButton :
         BottomNavItem("Perfil", Icons.Default.Person, Route.Profile)
+    data object PomodoroButton :
+        BottomNavItem("Timer", Icons.Default.Timer, Route.Pomodoro)
 }

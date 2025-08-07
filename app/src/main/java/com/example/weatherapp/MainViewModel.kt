@@ -1,6 +1,7 @@
 package com.example.weatherapp
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import com.example.weatherapp.ui.model.City
@@ -15,7 +16,7 @@ class MainViewModel : ViewModel() {
 
     // LIVROS
     private val _books = mutableStateListOf<Book>()
-    val books: List<Book> get() = _books
+    val books: SnapshotStateList<Book> get() = _books
 
     fun addBook(book: Book) {
         if (_books.none { it.title == book.title && it.author == book.author }) {
@@ -25,6 +26,20 @@ class MainViewModel : ViewModel() {
 
     fun removeBook(book: Book) {
         _books.remove(book)
+    }
+
+    fun addPomodoroSession(book: Book) {
+        val idx = _books.indexOfFirst { it.title == book.title && it.author == book.author }
+        if (idx != -1) {
+            _books[idx] = _books[idx].copy(pomodoroSessions = _books[idx].pomodoroSessions + 1)
+        }
+    }
+
+    fun startPomodoroSession(book: Book) {
+        val idx = _books.indexOfFirst { it.title == book.title && it.author == book.author }
+        if (idx != -1) {
+            _books[idx] = _books[idx].copy(isReading = true)
+        }
     }
 }
 

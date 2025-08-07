@@ -96,6 +96,7 @@ class MainActivity : ComponentActivity() {
                         val items = listOf(
                             BottomNavItem.HomeButton,
                             BottomNavItem.SearchButton,
+                            BottomNavItem.PomodoroButton,
                             BottomNavItem.ProfileButton
                         )
 

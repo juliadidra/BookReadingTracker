@@ -29,7 +29,7 @@ import com.example.weatherapp.ui.book.Book
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookScreen(mainViewModel: MainViewModel = viewModel()) {
+fun BookScreen(mainViewModel: MainViewModel) {
     var showSearch by remember { mutableStateOf(false) }
     var showProfile by remember { mutableStateOf(false) }
     when {
@@ -46,12 +46,8 @@ fun BookScreen(mainViewModel: MainViewModel = viewModel()) {
         }
     }
 
-    val currentBooks = listOf(
-        Book("The Great Gatsby", "F. Scott Fitzgerald", "https://placeholder.com/book1.jpg", 65),
-        Book("To Kill a Mockingbird", "Harper Lee", "https://placeholder.com/book2.jpg", 42),
-        Book("1984", "George Orwell", "https://placeholder.com/book3.jpg", 78)
-    )
-    val savedBooks = mainViewModel.books // <-- Use os livros do ViewModel
+    val books = mainViewModel.books
+    val readingBooks = books.filter { it.isReading }
 
     Scaffold(
         // ...existing code...
@@ -75,7 +71,7 @@ fun BookScreen(mainViewModel: MainViewModel = viewModel()) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(currentBooks) { book ->
+                    items(readingBooks) { book ->
                         CurrentReadingCard(book)
                     }
                 }
@@ -98,7 +94,7 @@ fun BookScreen(mainViewModel: MainViewModel = viewModel()) {
                     }
                 }
             }
-            items(savedBooks) { book ->
+            items(books) { book ->
                 SavedBookItem(book)
             }
         }
@@ -115,7 +111,6 @@ fun CurrentReadingCard(book: Book) {
         onClick = { }
     ) {
         Column {
-            // Substituir AsyncImage por Box placeholder
             Box(
                 modifier = Modifier
                     .height(180.dp)
@@ -152,6 +147,12 @@ fun CurrentReadingCard(book: Book) {
                 Text(
                     text = "${book.progress}%",
                     fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                Text(
+                    text = "Pomodoros: ${book.pomodoroSessions}",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
