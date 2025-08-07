@@ -17,8 +17,6 @@ sealed interface Route {
     data object Profile : Route
     @Serializable
     data object Search : Route
-    @Serializable
-    data object Book : Route
 }
 sealed class BottomNavItem(
     val title: String,
@@ -26,13 +24,9 @@ sealed class BottomNavItem(
     val route: Route)
 {
     data object HomeButton :
-        BottomNavItem("Início", Icons.Default.Home, Route.Book)
-    data object BookButton :
-        BottomNavItem("Livros", Icons.Default.Book, Route.Book)
-
+        BottomNavItem("Início", Icons.Default.Home, Route.Home)
     data object SearchButton :
         BottomNavItem("Buscar", Icons.Default.Search, Route.Search)
-
     data object ProfileButton :
         BottomNavItem("Perfil", Icons.Default.Person, Route.Profile)
 }

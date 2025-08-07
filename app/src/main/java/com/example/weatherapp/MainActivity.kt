@@ -96,8 +96,7 @@ class MainActivity : ComponentActivity() {
                         val items = listOf(
                             BottomNavItem.HomeButton,
                             BottomNavItem.SearchButton,
-                            BottomNavItem.ProfileButton,
-                            BottomNavItem.BookButton
+                            BottomNavItem.ProfileButton
                         )
 
                         BottomNavBar(navController = navController, items)
