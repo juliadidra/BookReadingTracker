@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import com.example.weatherapp.ui.components.DataField
 import com.example.weatherapp.ui.components.PasswordField
+import com.google.firebase.auth.auth
+import com.google.firebase.Firebase
 
 
 class RegisterActivity : ComponentActivity() {
@@ -60,7 +62,9 @@ fun RegisterPage(modifier: Modifier = Modifier) {
     var confirmpassword by rememberSaveable { mutableStateOf("") }
     val activity = LocalContext.current as? Activity
     Column(
-        modifier = modifier.padding(12.dp).fillMaxSize(),
+        modifier = modifier
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = CenterHorizontally,
     ) {
@@ -68,54 +72,69 @@ fun RegisterPage(modifier: Modifier = Modifier) {
             text = "Bem-vindo/a! Faça seu cadastro",
             fontSize = 24.sp
         )
+        Spacer(modifier = Modifier.size(12.dp))
         DataField(
             label = "Digite seu nome",
             value = name,
             onValueChange = { name = it },
-            modifier = modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier.fillMaxWidth()
         )
-
+        Spacer(modifier = Modifier.size(8.dp))
         DataField(
             label = "Digite seu e-mail",
             value = email,
             onValueChange = { email = it },
-            modifier = modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier.fillMaxWidth()
         )
-
+        Spacer(modifier = Modifier.size(8.dp))
         PasswordField(
             label = "Digite sua senha",
             value = password,
             onValueChange = { password = it },
-            modifier = modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier.fillMaxWidth()
         )
-
+        Spacer(modifier = Modifier.size(8.dp))
         PasswordField(
             label = "Repita sua senha",
             value = confirmpassword,
             onValueChange = { confirmpassword = it },
-            modifier = modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier.fillMaxWidth()
         )
-
-        Column(modifier = modifier,
+        Spacer(modifier = Modifier.size(16.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = CenterHorizontally,) {
+            horizontalAlignment = CenterHorizontally,
+        ) {
             Button(
                 onClick = {
-                    Toast.makeText(activity, "Registro OK!", Toast.LENGTH_LONG).show()
-                    activity?.finish()
+                    Firebase.auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(activity!!) { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(activity,
+                                    "Registro OK!", Toast.LENGTH_LONG).show()
+                                activity?.startActivity(
+                                    Intent(activity, LoginActivity::class.java).setFlags(
+                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                                    )
+                                )
+                                activity?.finish()
+                            } else {
+                                Toast.makeText(activity,
+                                    "Registro FALHOU!", Toast.LENGTH_LONG).show()
+                            }
+                        }
                 },
-                enabled = email.isNotEmpty() && password.isNotEmpty()
-
+                enabled = name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmpassword.isNotEmpty() && password == confirmpassword
             ) {
                 Text("Registrar")
             }
-            Spacer(modifier = modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(12.dp))
             Button(
-                onClick = { email = ""; password = "" }
+                onClick = { email = ""; password = ""; confirmpassword = ""; name = "" }
             ) {
                 Text("Limpar")
             }
-
         }
     }
 }

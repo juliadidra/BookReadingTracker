@@ -1,6 +1,7 @@
 package com.example.weatherapp
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -48,6 +49,8 @@ import com.example.weatherapp.ui.theme.WeatherAppTheme
 import com.weatherapp.ui.nav.BottomNavBar
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.example.weatherapp.ui.nav.Route
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -80,12 +83,16 @@ class MainActivity : ComponentActivity() {
                             ),
 
                             actions = {
-
-                                IconButton( onClick = { finish() } ) {
+                                IconButton(onClick = {
+                                    Firebase.auth.signOut()
+                                    val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                                    startActivity(intent)
+                                    finish()
+                                }) {
                                     Icon(
-                                        imageVector =
-                                            Icons.AutoMirrored.Filled.ExitToApp,
-                                        contentDescription = "Localized description"
+                                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                        contentDescription = "Sair"
                                     )
                                 }
                             }
