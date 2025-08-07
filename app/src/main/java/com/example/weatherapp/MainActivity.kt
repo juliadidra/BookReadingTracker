@@ -1,6 +1,7 @@
 package com.example.weatherapp
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -82,14 +83,16 @@ class MainActivity : ComponentActivity() {
                             ),
 
                             actions = {
-
-                                IconButton( onClick = { Firebase.auth.signOut()
+                                IconButton(onClick = {
+                                    Firebase.auth.signOut()
+                                    val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                                    startActivity(intent)
                                     finish()
-                                } ) {
+                                }) {
                                     Icon(
-                                        imageVector =
-                                            Icons.AutoMirrored.Filled.ExitToApp,
-                                        contentDescription = "Localized description"
+                                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                        contentDescription = "Sair"
                                     )
                                 }
                             }

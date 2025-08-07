@@ -62,7 +62,9 @@ fun RegisterPage(modifier: Modifier = Modifier) {
     var confirmpassword by rememberSaveable { mutableStateOf("") }
     val activity = LocalContext.current as? Activity
     Column(
-        modifier = modifier.padding(12.dp).fillMaxSize(),
+        modifier = modifier
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = CenterHorizontally,
     ) {
@@ -70,36 +72,37 @@ fun RegisterPage(modifier: Modifier = Modifier) {
             text = "Bem-vindo/a! Faça seu cadastro",
             fontSize = 24.sp
         )
+        Spacer(modifier = Modifier.size(12.dp))
         DataField(
             label = "Digite seu nome",
             value = name,
             onValueChange = { name = it },
-            modifier = modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier.fillMaxWidth()
         )
-
+        Spacer(modifier = Modifier.size(8.dp))
         DataField(
             label = "Digite seu e-mail",
             value = email,
             onValueChange = { email = it },
-            modifier = modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier.fillMaxWidth()
         )
-
+        Spacer(modifier = Modifier.size(8.dp))
         PasswordField(
             label = "Digite sua senha",
             value = password,
             onValueChange = { password = it },
-            modifier = modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier.fillMaxWidth()
         )
-
+        Spacer(modifier = Modifier.size(8.dp))
         PasswordField(
             label = "Repita sua senha",
             value = confirmpassword,
             onValueChange = { confirmpassword = it },
-            modifier = modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier.fillMaxWidth()
         )
-
+        Spacer(modifier = Modifier.size(16.dp))
         Column(
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = CenterHorizontally,
         ) {
@@ -126,7 +129,7 @@ fun RegisterPage(modifier: Modifier = Modifier) {
             ) {
                 Text("Registrar")
             }
-            Spacer(modifier = modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(12.dp))
             Button(
                 onClick = { email = ""; password = ""; confirmpassword = ""; name = "" }
             ) {
