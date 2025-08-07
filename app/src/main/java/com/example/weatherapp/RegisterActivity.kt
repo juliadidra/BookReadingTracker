@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import com.example.weatherapp.ui.components.DataField
 import com.example.weatherapp.ui.components.PasswordField
+import com.google.firebase.auth.auth
+import com.google.firebase.Firebase
 
 
 class RegisterActivity : ComponentActivity() {
@@ -96,26 +98,40 @@ fun RegisterPage(modifier: Modifier = Modifier) {
             modifier = modifier.fillMaxWidth(fraction = 0.9f)
         )
 
-        Column(modifier = modifier,
+        Column(
+            modifier = modifier,
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = CenterHorizontally,) {
+            horizontalAlignment = CenterHorizontally,
+        ) {
             Button(
                 onClick = {
-                    Toast.makeText(activity, "Registro OK!", Toast.LENGTH_LONG).show()
-                    activity?.finish()
+                    Firebase.auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(activity!!) { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(activity,
+                                    "Registro OK!", Toast.LENGTH_LONG).show()
+                                activity?.startActivity(
+                                    Intent(activity, LoginActivity::class.java).setFlags(
+                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                                    )
+                                )
+                                activity?.finish()
+                            } else {
+                                Toast.makeText(activity,
+                                    "Registro FALHOU!", Toast.LENGTH_LONG).show()
+                            }
+                        }
                 },
-                enabled = email.isNotEmpty() && password.isNotEmpty()
-
+                enabled = name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmpassword.isNotEmpty() && password == confirmpassword
             ) {
                 Text("Registrar")
             }
             Spacer(modifier = modifier.size(24.dp))
             Button(
-                onClick = { email = ""; password = "" }
+                onClick = { email = ""; password = ""; confirmpassword = ""; name = "" }
             ) {
                 Text("Limpar")
             }
-
         }
     }
 }
