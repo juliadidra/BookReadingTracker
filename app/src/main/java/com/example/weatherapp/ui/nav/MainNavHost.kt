@@ -18,7 +18,7 @@ fun MainNavHost(navController: NavHostController, viewModel: MainViewModel) {
     NavHost(navController, startDestination = Route.Home) {
 
         composable<Route.Home> { BookScreen() } // Nova rota para livros
-        composable<Route.Search> { BookSearchScreen() }
+        composable<Route.Search> { BookSearchScreen(mainViewModel = viewModel) }
         composable<Route.Profile> { ProfileScreen() }
     }
 }

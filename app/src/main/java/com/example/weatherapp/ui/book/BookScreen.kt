@@ -23,16 +23,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.weatherapp.MainViewModel
 import com.example.weatherapp.ui.book.Book
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookScreen() {
+fun BookScreen(mainViewModel: MainViewModel = viewModel()) {
     var showSearch by remember { mutableStateOf(false) }
     var showProfile by remember { mutableStateOf(false) }
     when {
         showSearch -> {
-            BookSearchScreen(onBack = { showSearch = false })
+            BookSearchScreen(
+                onBack = { showSearch = false },
+                mainViewModel = mainViewModel // <-- Passe o ViewModel
+            )
             return
         }
         showProfile -> {
@@ -40,43 +45,16 @@ fun BookScreen() {
             return
         }
     }
+
     val currentBooks = listOf(
         Book("The Great Gatsby", "F. Scott Fitzgerald", "https://placeholder.com/book1.jpg", 65),
         Book("To Kill a Mockingbird", "Harper Lee", "https://placeholder.com/book2.jpg", 42),
         Book("1984", "George Orwell", "https://placeholder.com/book3.jpg", 78)
     )
-    val savedBooks = listOf(
-        Book("Pride and Prejudice", "Jane Austen", "https://placeholder.com/book4.jpg", 0),
-        Book("The Hobbit", "J.R.R. Tolkien", "https://placeholder.com/book5.jpg", 0),
-        Book("Harry Potter", "J.K. Rowling", "https://placeholder.com/book6.jpg", 0),
-        Book("The Alchemist", "Paulo Coelho", "https://placeholder.com/book7.jpg", 0)
-    )
+    val savedBooks = mainViewModel.books // <-- Use os livros do ViewModel
+
     Scaffold(
-//        bottomBar = {
-//            NavigationBar {
-//                NavigationBarItem(
-//                    selected = true,
-//                    onClick = { /* Navegação futura: Home dos livros */ },
-//                    icon = { Icon(Icons.Default.Book, contentDescription = "Home") },
-//                    label = { Text("Home") }
-//                )
-//                NavigationBarItem(
-//                    selected = false,
-//                    onClick = { /* Navegação futura: Busca */ },
-//                    icon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-//                    label = { Text("Buscar") }
-//                )
-//                NavigationBarItem(
-//                    selected = false,
-//                    onClick = { showProfile = true },
-//                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-//                    label = { Text("Perfil") }
-//                )
-//            }
-//        }
-
-
-
+        // ...existing code...
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

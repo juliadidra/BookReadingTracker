@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,30 +17,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weatherapp.MainViewModel
+import com.example.weatherapp.OpenLibraryService
 import com.example.weatherapp.ui.book.Book
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookSearchScreen(onBack: () -> Unit = {}) {
+fun BookSearchScreen(
+    onBack: () -> Unit = {},
+    mainViewModel: MainViewModel
+) {
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
-
-    val searchResults = remember(searchQuery) {
-        if (searchQuery.isNotEmpty()) {
-            listOf(
-                Book("The Great Gatsby", "F. Scott Fitzgerald", "https://placeholder.com/book1.jpg", 0),
-                Book("To Kill a Mockingbird", "Harper Lee", "https://placeholder.com/book2.jpg", 0),
-                Book("1984", "George Orwell", "https://placeholder.com/book3.jpg", 0),
-                Book("Pride and Prejudice", "Jane Austen", "https://placeholder.com/book4.jpg", 0),
-                Book("The Hobbit", "J.R.R. Tolkien", "https://placeholder.com/book5.jpg", 0)
-            ).filter {
-                it.title.contains(searchQuery, ignoreCase = true) ||
-                it.author.contains(searchQuery, ignoreCase = true)
-            }
-        } else {
-            emptyList()
-        }
-    }
+    var searchResults by remember { mutableStateOf<List<Book>>(emptyList()) }
+    var loading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val myBooks = mainViewModel.books
 
     Scaffold(
         topBar = {
@@ -67,6 +62,19 @@ fun BookSearchScreen(onBack: () -> Unit = {}) {
                 onValueChange = {
                     searchQuery = it
                     isSearching = it.isNotEmpty()
+                    if (isSearching) {
+                        loading = true
+                        scope.launch {
+                            searchResults = try {
+                                OpenLibraryService.searchBooks(searchQuery)
+                            } catch (e: Exception) {
+                                emptyList()
+                            }
+                            loading = false
+                        }
+                    } else {
+                        searchResults = emptyList()
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,7 +85,14 @@ fun BookSearchScreen(onBack: () -> Unit = {}) {
             )
 
             if (isSearching) {
-                if (searchResults.isEmpty()) {
+                if (loading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else if (searchResults.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -89,12 +104,17 @@ fun BookSearchScreen(onBack: () -> Unit = {}) {
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(searchResults) { book ->
-                            SearchResultItem(book)
+                            val isSaved = myBooks.any { it.title == book.title && it.author == book.author }
+                            SearchResultItem(
+                                book = book,
+                                isSaved = isSaved,
+                                onAdd = { mainViewModel.addBook(book) },
+                                onRemove = { mainViewModel.removeBook(book) }
+                            )
                         }
                     }
                 }
             } else {
-                // Categorias populares (placeholder)
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -146,7 +166,12 @@ fun CategoryChips() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultItem(book: Book) {
+fun SearchResultItem(
+    book: Book,
+    isSaved: Boolean,
+    onAdd: () -> Unit,
+    onRemove: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -156,7 +181,6 @@ fun SearchResultItem(book: Book) {
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Substituir AsyncImage por Box placeholder
             Box(
                 modifier = Modifier
                     .width(70.dp)
@@ -182,6 +206,12 @@ fun SearchResultItem(book: Book) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            IconButton(onClick = if (isSaved) onRemove else onAdd) {
+                Icon(
+                    imageVector = if (isSaved) Icons.Default.Delete else Icons.Default.Add,
+                    contentDescription = if (isSaved) "Remover" else "Adicionar"
+                )
+            }
         }
     }
-} 
+}
