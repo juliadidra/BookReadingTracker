@@ -34,167 +34,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PomodoroScreen(mainViewModel: MainViewModel) {
-    val books = mainViewModel.books
-    var selectedBook by remember { mutableStateOf<Book?>(null) }
-    var isWorkMode by remember { mutableStateOf(true) }
-    var workMinutes by remember { mutableStateOf(25f) }
-    var restMinutes by remember { mutableStateOf(5f) }
-    var timerRunning by remember { mutableStateOf(false) }
-    var secondsLeft by remember { mutableStateOf((workMinutes * 60).toInt()) }
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    // Atualiza o tempo quando o usuário muda o slider
-    LaunchedEffect(workMinutes, restMinutes, isWorkMode) {
-        if (!timerRunning) {
-            secondsLeft = if (isWorkMode) (workMinutes * 60).toInt() else (restMinutes * 60).toInt()
-        }
-    }
-
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Selecione o livro para a sessão Pomodoro", style = MaterialTheme.typography.titleLarge)
-        if (books.isEmpty()) {
-            Text("Nenhum livro encontrado. Adicione livros na aba de busca.", color = MaterialTheme.colorScheme.error)
-        } else {
-            LazyColumn(Modifier.height(120.dp)) {
-                items(books) { book ->
-                    ListItem(
-                        headlineContent = { Text(book.title) },
-                        supportingContent = { Text(book.author) },
-                        trailingContent = {
-                            if (selectedBook == book) {
-                                Icon(Icons.Default.Book, contentDescription = null)
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { selectedBook = book }
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-        if (selectedBook != null) {
-            Box(
-                modifier = Modifier
-                    .size(240.dp)
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularTimer(
-                    totalSeconds = if (isWorkMode) (workMinutes * 60).toInt() else (restMinutes * 60).toInt(),
-                    secondsLeft = secondsLeft,
-                    isWorkMode = isWorkMode
-                )
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.align(Alignment.Center)
-                ) {
-                    Text(
-                        text = "%02d:%02d".format(secondsLeft / 60, secondsLeft % 60),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 44.sp,
-                        color = if (isWorkMode) Color(0xFF388E3C) else Color(0xFF455A64)
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = if (isWorkMode) "Work" else "Rest",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 18.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text("Pomodoro", modifier = Modifier.width(90.dp), fontWeight = FontWeight.Medium)
-                Slider(
-                    value = workMinutes,
-                    onValueChange = { workMinutes = it },
-                    valueRange = 1f..60f,
-                    enabled = !timerRunning && isWorkMode,
-                    colors = SliderDefaults.colors(
-                        thumbColor = Color(0xFF388E3C),
-                        activeTrackColor = Color(0xFF81C784)
-                    )
-                )
-                Text("${workMinutes.roundToInt()} min", modifier = Modifier.width(50.dp), fontWeight = FontWeight.Bold)
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text("Descanso", modifier = Modifier.width(90.dp), fontWeight = FontWeight.Medium)
-                Slider(
-                    value = restMinutes,
-                    onValueChange = { restMinutes = it },
-                    valueRange = 1f..30f,
-                    enabled = !timerRunning && !isWorkMode,
-                    colors = SliderDefaults.colors(
-                        thumbColor = Color(0xFF455A64),
-                        activeTrackColor = Color(0xFF90A4AE)
-                    )
-                )
-                Text("${restMinutes.roundToInt()} min", modifier = Modifier.width(50.dp), fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
-                        if (timerRunning) {
-                            timerRunning = false
-                        } else {
-                            timerRunning = true
-                            mainViewModel.startPomodoroSession(selectedBook!!)
-                            scope.launch {
-                                while (secondsLeft > 0 && timerRunning) {
-                                    delay(1000)
-                                    secondsLeft--
-                                }
-                                if (timerRunning) {
-                                    if (isWorkMode) {
-                                        mainViewModel.addPomodoroSession(selectedBook!!)
-                                    }
-                                    sendPomodoroNotification(context, selectedBook!!.title, isWorkMode)
-                                    isWorkMode = !isWorkMode
-                                    secondsLeft = if (isWorkMode) (workMinutes * 60).toInt() else (restMinutes * 60).toInt()
-                                    timerRunning = false
-                                }
-                            }
-                        }
-                    },
-                    modifier = Modifier.size(80.dp)
-                ) {
-                    Icon(
-                        imageVector = if (timerRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (timerRunning) "Pause" else "Play",
-                        modifier = Modifier.size(64.dp),
-                        tint = if (isWorkMode) Color(0xFF388E3C) else Color(0xFF455A64)
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun CircularTimer(totalSeconds: Int, secondsLeft: Int, isWorkMode: Boolean) {
@@ -238,3 +77,230 @@ fun sendPomodoroNotification(context: Context, bookTitle: String, isWorkMode: Bo
         .setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT)
     manager.notify(System.currentTimeMillis().toInt(), builder.build())
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PomodoroScreen(mainViewModel: MainViewModel) {
+    val books = mainViewModel.books
+    var selectedBook by remember { mutableStateOf<Book?>(null) }
+    var isWorkMode by remember { mutableStateOf(true) }
+    var workMinutes by remember { mutableStateOf(25f) }
+    var restMinutes by remember { mutableStateOf(5f) }
+    var timerRunning by remember { mutableStateOf(false) }
+    var isPaused by remember { mutableStateOf(false) }
+    var secondsLeft by remember { mutableStateOf((workMinutes * 60).toInt()) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // Atualiza o tempo quando o usuário muda o slider
+    LaunchedEffect(workMinutes, restMinutes, isWorkMode) {
+        if (!timerRunning) {
+            secondsLeft = if (isWorkMode) (workMinutes * 60).toInt() else (restMinutes * 60).toInt()
+        }
+    }
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            "Selecione o livro para a sessão Pomodoro",
+            style = MaterialTheme.typography.titleLarge
+        )
+        if (books.isEmpty()) {
+            Text(
+                "Nenhum livro encontrado. Adicione livros na aba de busca.",
+                color = MaterialTheme.colorScheme.error
+            )
+        } else {
+            LazyColumn(Modifier.height(120.dp)) {
+                items(books) { book ->
+                    ListItem(
+                        headlineContent = { Text(book.title) },
+                        supportingContent = { Text(book.author) },
+                        trailingContent = {
+                            if (selectedBook == book) {
+                                Icon(Icons.Default.Book, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedBook = book }
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        // ...existing code...
+        if (selectedBook != null) {
+            Box(
+                modifier = Modifier
+                    .size(240.dp)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularTimer(
+                    totalSeconds = if (isWorkMode) (workMinutes * 60).toInt() else (restMinutes * 60).toInt(),
+                    secondsLeft = secondsLeft,
+                    isWorkMode = isWorkMode
+                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Text(
+                        text = "%02d:%02d".format(secondsLeft / 60, secondsLeft % 60),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 36.sp,
+                        color = if (isWorkMode) Color(0xFF388E3C) else Color(0xFF455A64)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = if (isWorkMode) "Work" else "Rest",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    IconButton(
+                        onClick = {
+                            if (!timerRunning) {
+                                timerRunning = true
+                                isPaused = false
+                                mainViewModel.startPomodoroSession(selectedBook!!)
+                                scope.launch {
+                                    while (secondsLeft > 0 && timerRunning) {
+                                        if (!isPaused) {
+                                            delay(1000)
+                                            secondsLeft--
+                                        } else {
+                                            delay(100)
+                                        }
+                                    }
+                                    if (timerRunning && !isPaused) {
+                                        if (isWorkMode) {
+                                            mainViewModel.addPomodoroSession(selectedBook!!)
+                                        }
+                                        sendPomodoroNotification(
+                                            context,
+                                            selectedBook!!.title,
+                                            isWorkMode
+                                        )
+                                        isWorkMode = !isWorkMode
+                                        secondsLeft =
+                                            if (isWorkMode) (workMinutes * 60).toInt() else (restMinutes * 60).toInt()
+                                        timerRunning = false
+                                    }
+                                }
+                            } else {
+                                isPaused = !isPaused
+                            }
+                        },
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (!timerRunning) Icons.Default.PlayArrow else if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
+                            contentDescription = if (!timerRunning) "Iniciar" else if (isPaused) "Continuar" else "Pausar",
+                            modifier = Modifier.size(48.dp),
+                            tint = if (isWorkMode) Color(0xFF388E3C) else Color(0xFF455A64)
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text("Pomodoro", fontWeight = FontWeight.Medium)
+                Slider(
+                    value = workMinutes,
+                    onValueChange = { workMinutes = it },
+                    valueRange = 1f..60f,
+                    enabled = !timerRunning && isWorkMode,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF388E3C),
+                        activeTrackColor = Color(0xFF81C784)
+                    )
+                )
+                Text("${workMinutes.roundToInt()} min", fontWeight = FontWeight.Bold)
+
+                Text("Descanso", fontWeight = FontWeight.Medium)
+                Slider(
+                    value = restMinutes,
+                    onValueChange = { restMinutes = it },
+                    valueRange = 1f..30f,
+                    enabled = !timerRunning && !isWorkMode,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF455A64),
+                        activeTrackColor = Color(0xFF90A4AE)
+                    )
+                )
+                Text("${restMinutes.roundToInt()} min", fontWeight = FontWeight.Bold)
+            }
+        }
+
+
+
+            Spacer(Modifier.height(24.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Botão iniciar/pause
+                IconButton(
+                    onClick = {
+                        if (!timerRunning) {
+                            timerRunning = true
+                            isPaused = false
+                            mainViewModel.startPomodoroSession(selectedBook!!)
+                            scope.launch {
+                                while (secondsLeft > 0 && timerRunning) {
+                                    if (!isPaused) {
+                                        delay(1000)
+                                        secondsLeft--
+                                    } else {
+                                        delay(100)
+                                    }
+                                }
+                                if (timerRunning && !isPaused) {
+                                    if (isWorkMode) {
+                                        mainViewModel.addPomodoroSession(selectedBook!!)
+                                    }
+                                    sendPomodoroNotification(
+                                        context,
+                                        selectedBook!!.title,
+                                        isWorkMode
+                                    )
+                                    isWorkMode = !isWorkMode
+                                    secondsLeft =
+                                        if (isWorkMode) (workMinutes * 60).toInt() else (restMinutes * 60).toInt()
+                                    timerRunning = false
+                                }
+                            }
+                        } else {
+                            isPaused = !isPaused
+                        }
+                    },
+                    modifier = Modifier.size(80.dp)
+                ) {
+                    Icon(
+                        imageVector = if (!timerRunning) Icons.Default.PlayArrow else if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
+                        contentDescription = if (!timerRunning) "Iniciar" else if (isPaused) "Continuar" else "Pausar",
+                        modifier = Modifier.size(64.dp),
+                        tint = if (isWorkMode) Color(0xFF388E3C) else Color(0xFF455A64)
+                    )
+                }
+            }
+        }
+    }
+
+
